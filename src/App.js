@@ -2,10 +2,21 @@ import React from "react";
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import RecipeExcerpt from "./components/RecipeExcerpt";
+import RecipeFull from "./components/RecipeFull"
 import "./App.css";
 
 function App() {
   const [recipes, setRecipes] = useState([]);
+  const [selectedRecipe, setSelectedRecipe] = useState(null)
+
+  const handleSelectRecipe = (recipe) => {
+    setSelectedRecipe(recipe)
+  }
+
+  const handleUnselectRecipe = () => {
+    setSelectedRecipe(null)
+  }
+
   const fetchAllRecipes = async() => {
     try {
       const response = await fetch("http://127.0.0.1:5000/api/recipes");
@@ -27,12 +38,15 @@ function App() {
   return (
     <div className='recipe-app'>
       <Header />
-      <p>Your recipes here! </p>
-      <div className="recipe-list">
-        {recipes.map((recipe) => (
-          <RecipeExcerpt recipe={recipe} key={recipe.id}/>
-        ))}
-      </div>
+      {selectedRecipe === null ? (
+        <div className="recipe-list">
+          {recipes.map((recipe) => (
+            <RecipeExcerpt recipe={recipe} key={recipe.id} handleSelectRecipe={handleSelectRecipe} />
+          ))}
+        </div>
+      ) : (
+        <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe}/>
+      )}
     </div>
   );
 }
