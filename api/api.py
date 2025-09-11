@@ -40,23 +40,23 @@ def get_all_recipes():
 
 @app.route("/api/recipes", methods=["POST"])
 def add_recipe():
-    data = request.get_json()
+    data = request.get_json()  # parses JSON from http request and returns python dictionary or none
     required_fields = ["title", "ingredients", "instructions", "description", "image_url", "servings"]
     for field in required_fields:
-        if field not in data or data[field] == ""
-        return jsonify({"error": f"Missing required field: {field}"}), 400
-        
+        if field not in data or data[field] == "":
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    # add recipe to database. new_recipe is an instance of the Recipe class. It is an object.
     new_recipe = Recipe(
         title = data["title"],
         ingredients = data["ingredients"],
         instructions = data["instructions"],
-        description = data["description"],
+        description = data["description"],        
         image_url = data["image_url"],
         servings = data["servings"]
     )
     db.session.add(new_recipe)
     db.session.commit()
-
+    # serialization - convert the object to a dictionary so python can transform it back into JSON to send as API response
     new_recipe_dictionary = {
         "id": new_recipe.id,
         "title": new_recipe.title,
@@ -67,6 +67,45 @@ def add_recipe():
         "servings": new_recipe.servings
     }
     return jsonify({"message": "Recipe added successfully", "recipe": new_recipe_dictionary})
+
+@app.route("/api/recipes/<int:recipe_id>", methods=["PUT"])
+def update_recipe(recipe_id):
+    recipe_to_update = Recipe.query.get(recipe_id) # returns an object or none
+    if not recipe_to_update:
+        return jsonify({"error": "Recipe not found"}), 404
+    data = request.get_json() # parses JSON from http request and returns python dictionary or none
+    required_fields = ["title", "ingredients", "instructions", "description", "image_url", "servings"]
+    for field in required_fields:
+        if field not in data or data[field] == "":
+            return jsonify({"error": f"Missing required field: {field}"}), 400
+    # update recipe in the database
+    recipe_to_update.title = data['title']
+    recipe_to_update.ingredients = data['ingredients']
+    recipe_to_update.instructions = data['instructions']
+    recipe_to_update.servings = data['servings']
+    recipe_to_update.description = data['description']
+    recipe_to_update.image_url = data['image_url']
+    db.session.commit()
+    #serialization - Turn database model objects into JSON-serializable dictionaries to send as API responses.
+    updated_recipe_dictionary = {
+        "id": recipe_to_update.id,
+        "title": recipe_to_update.title,
+        "ingredients": recipe_to_update.ingredients,
+        "instructions": recipe_to_update.instructions,
+        "description": recipe_to_update.description,
+        "image_url": recipe_to_update.image_url,
+        "servings": recipe_to_update.servings
+    }
+    return jsonify({"message": "Recipe Updated successfully", "recipe": updated_recipe_dictionary})
+
+@app.route("/api/recipes/<int:recipe_id>", methods=["DELETE"])
+def delete_recipe(recipe_id):
+    recipe = Recipe.query.get(recipe_id)
+    if not recipe:
+        return jsonify({"error": "Recipe not found"}), 404
+    db.session.delete(recipe)
+    db.session.commit()  
+    return jsonify({"message": "Recipe deleted successfully"})
 
 if __name__ == '__main__':
     app.run(debug=True)
