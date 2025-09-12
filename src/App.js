@@ -90,7 +90,6 @@ function App() {
     } catch(error) {
       console.error("Error adding recipe", error)
       console.log("Error adding recipe", error.message)
-      return
     }
   }
 
@@ -119,7 +118,24 @@ function App() {
     } catch(error) {
       console.error("Error updating recipe", error)
       console.log("Error updating recipe", error.message)
-      return
+    }
+  }
+
+  const handleDeleteRecipe = async(selectedRecipe) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/api/recipes/${selectedRecipe.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to delete recipe ${response.status}`)
+      }
+      const data = await response.json(); 
+      console.log(data.message)
+      setRecipes(recipes.filter((recipe) => recipe.id !== selectedRecipe.id))  
+      setSelectedRecipe(null)
+    } catch(error) {
+      console.error("Error deleting recipe", error)
+      console.log("Error deleting recipe", error.message)
     }
   }
 
@@ -127,7 +143,7 @@ function App() {
     <div className='recipe-app'>
       <Header showRecipeForm={showRecipeForm} />
       {showNewRecipeForm && <NewRecipeForm newRecipe={newRecipe} hideRecipeForm={hideRecipeForm} handleChange={handleChange} handleNewRecipe={handleNewRecipe} />}
-      {selectedRecipe && <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe} handleChange={handleChange} handleUpdateRecipe={handleUpdateRecipe} />}
+      {selectedRecipe && <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe} handleChange={handleChange} handleUpdateRecipe={handleUpdateRecipe} handleDeleteRecipe={handleDeleteRecipe} />}
       {selectedRecipe === null && showNewRecipeForm === false && (
         <div className="recipe-list">
           {recipes.map((recipe) => (
