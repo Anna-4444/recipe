@@ -59,18 +59,46 @@ function App() {
     fetchAllRecipes()
   }, [])
 
+  const handleNewRecipe = async(e, newRecipe) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/recipes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newRecipe)
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to add recipe ${response.status}`)
+      }
+      const data = await response.json();
+      setRecipes([...recipes, data.recipe])
+      setShowNewRecipeForm(false)
+      setNewRecipe({
+        title: "",
+        ingredients: "",
+        instructions: "",
+        servings: 1, // conservative default
+        description: "",
+        image_url: "https://images.pexels.com/photos/9986228/pexels-photo-9986228.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" //default
+      })
+    } catch(error) {
+      console.error(error)
+    }
+  }
+
   return (
     <div className='recipe-app'>
       <Header showRecipeForm={showRecipeForm} />
-      {showNewRecipeForm === true && <NewRecipeForm newRecipe={newRecipe} hideRecipeForm={hideRecipeForm} handleChange={handleChange} />}
-      {selectedRecipe === null ? (
+      {showNewRecipeForm && <NewRecipeForm newRecipe={newRecipe} hideRecipeForm={hideRecipeForm} handleChange={handleChange} handleNewRecipe={handleNewRecipe} />}
+      {selectedRecipe && <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe}/>}
+      {selectedRecipe === null && showNewRecipeForm === false && (
         <div className="recipe-list">
           {recipes.map((recipe) => (
             <RecipeExcerpt recipe={recipe} key={recipe.id} handleSelectRecipe={handleSelectRecipe} />
           ))}
         </div>
-      ) : (
-        <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe}/>
       )}
     </div>
   );
