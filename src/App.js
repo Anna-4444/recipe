@@ -36,10 +36,14 @@ function App() {
     setShowNewRecipeForm(false)
   }
 
-  const handleChange = (e) => {
+  const handleChange = (e, action = "new") => {
     const { name, value } = e.target;
-    setNewRecipe({ ...newRecipe, [name]: value });
-}
+    if (action === "update") {
+      setSelectedRecipe({ ...selectedRecipe, [name]: value });
+    } else {
+      setNewRecipe({ ...newRecipe, [name]: value });
+    }
+  }
 
   const fetchAllRecipes = async() => {
     try {
@@ -84,7 +88,38 @@ function App() {
         image_url: "https://images.pexels.com/photos/9986228/pexels-photo-9986228.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" //default
       })
     } catch(error) {
-      console.error(error)
+      console.error("Error adding recipe", error)
+      console.log("Error adding recipe", error.message)
+      return
+    }
+  }
+
+  const handleUpdateRecipe = async(e, selectedRecipe) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/api/recipes/${selectedRecipe.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(selectedRecipe)
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to update recipe ${response.status}`)
+      }
+      const data = await response.json();   
+      setRecipes(recipes.map((recipe) => {
+        if (recipe.id === selectedRecipe.id) {
+          return data.recipe;
+        } else {
+          return recipe;
+        }
+      }))
+      setSelectedRecipe(null)
+    } catch(error) {
+      console.error("Error updating recipe", error)
+      console.log("Error updating recipe", error.message)
+      return
     }
   }
 
@@ -92,7 +127,7 @@ function App() {
     <div className='recipe-app'>
       <Header showRecipeForm={showRecipeForm} />
       {showNewRecipeForm && <NewRecipeForm newRecipe={newRecipe} hideRecipeForm={hideRecipeForm} handleChange={handleChange} handleNewRecipe={handleNewRecipe} />}
-      {selectedRecipe && <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe}/>}
+      {selectedRecipe && <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe} handleChange={handleChange} handleUpdateRecipe={handleUpdateRecipe} />}
       {selectedRecipe === null && showNewRecipeForm === false && (
         <div className="recipe-list">
           {recipes.map((recipe) => (
