@@ -152,11 +152,17 @@ function App() {
     }
   }
 
+  const displayAllRecipes = () => {
+    setShowNewRecipeForm(false)
+    setSelectedRecipe(null)
+    setSearchTerm("")
+  }
+
   const displayedRecipes = searchTerm ? handleSearch() : recipes;
 
   return (
     <div className='recipe-app'>
-      <Header showRecipeForm={showRecipeForm} searchTerm={searchTerm} updateSearchTerm={updateSearchTerm} />
+      <Header showRecipeForm={showRecipeForm} searchTerm={searchTerm} updateSearchTerm={updateSearchTerm} displayAllRecipes={displayAllRecipes} />
       {showNewRecipeForm && <NewRecipeForm newRecipe={newRecipe} hideRecipeForm={hideRecipeForm} handleChange={handleChange} handleNewRecipe={handleNewRecipe} />}
       {selectedRecipe && <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe} handleChange={handleChange} handleUpdateRecipe={handleUpdateRecipe} handleDeleteRecipe={handleDeleteRecipe} />}
       {selectedRecipe === null && showNewRecipeForm === false && (
