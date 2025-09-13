@@ -7,9 +7,10 @@ import NewRecipeForm from "./components/NewRecipeForm";
 import "./App.css";
 
 function App() {
-  const [recipes, setRecipes] = useState([]);
+  const [recipes, setRecipes] = useState([])
   const [selectedRecipe, setSelectedRecipe] = useState(null)
   const [showNewRecipeForm, setShowNewRecipeForm] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
   const [newRecipe, setNewRecipe] = useState({
     title: "",
     ingredients: "",
@@ -45,6 +46,18 @@ function App() {
     }
   }
 
+  const updateSearchTerm = (text) => {
+    setSearchTerm(text)
+  }
+
+  const handleSearch = () => {
+    const searchResults = recipes.filter((recipe) => {
+      const valuesToSearch = [recipe.title, recipe.ingredients, recipe.description];
+      return valuesToSearch.some((value) => value.toLowerCase().includes(searchTerm.toLowerCase()));
+    });
+    return searchResults;
+  };
+  
   const fetchAllRecipes = async() => {
     try {
       const response = await fetch("http://127.0.0.1:5000/api/recipes");
@@ -139,14 +152,16 @@ function App() {
     }
   }
 
+  const displayedRecipes = searchTerm ? handleSearch() : recipes;
+
   return (
     <div className='recipe-app'>
-      <Header showRecipeForm={showRecipeForm} />
+      <Header showRecipeForm={showRecipeForm} searchTerm={searchTerm} updateSearchTerm={updateSearchTerm} />
       {showNewRecipeForm && <NewRecipeForm newRecipe={newRecipe} hideRecipeForm={hideRecipeForm} handleChange={handleChange} handleNewRecipe={handleNewRecipe} />}
       {selectedRecipe && <RecipeFull selectedRecipe={selectedRecipe} handleUnselectRecipe={handleUnselectRecipe} handleChange={handleChange} handleUpdateRecipe={handleUpdateRecipe} handleDeleteRecipe={handleDeleteRecipe} />}
       {selectedRecipe === null && showNewRecipeForm === false && (
         <div className="recipe-list">
-          {recipes.map((recipe) => (
+          {displayedRecipes.map((recipe) => (
             <RecipeExcerpt recipe={recipe} key={recipe.id} handleSelectRecipe={handleSelectRecipe} />
           ))}
         </div>
