@@ -4,6 +4,9 @@ import Header from "./components/Header";
 import RecipeExcerpt from "./components/RecipeExcerpt";
 import RecipeFull from "./components/RecipeFull";
 import NewRecipeForm from "./components/NewRecipeForm";
+import displayToast from "./helpers/toastHelper.js";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css"
 import "./App.css";
 
 function App() {
@@ -100,9 +103,10 @@ function App() {
         description: "",
         image_url: "https://images.pexels.com/photos/9986228/pexels-photo-9986228.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" //default
       })
+      displayToast("Recipe added successfully!", "success")
     } catch(error) {
       console.error("Error adding recipe", error)
-      console.log("Error adding recipe", error.message)
+      displayToast("Oops, could not add recipe", "error")
     }
   }
 
@@ -128,9 +132,10 @@ function App() {
         }
       }))
       setSelectedRecipe(null)
+      displayToast("Recipe updated successfully!", "success")
     } catch(error) {
       console.error("Error updating recipe", error)
-      console.log("Error updating recipe", error.message)
+      displayToast("Oops, could not update recipe", "error")
     }
   }
 
@@ -146,9 +151,10 @@ function App() {
       console.log(data.message)
       setRecipes(recipes.filter((recipe) => recipe.id !== selectedRecipe.id))  
       setSelectedRecipe(null)
+      displayToast("Recipe deleted successfully!", "success")
     } catch(error) {
       console.error("Error deleting recipe", error)
-      console.log("Error deleting recipe", error.message)
+      displayToast("Oops, could not delete recipe", "error")
     }
   }
 
@@ -172,6 +178,7 @@ function App() {
           ))}
         </div>
       )}
+      <ToastContainer />
     </div>
   );
 }
